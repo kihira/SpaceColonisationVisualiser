@@ -4,15 +4,15 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "watch": "watchify --debug main.js -o bundle.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@types/node": "^12.6.9",
     "three": "^0.107.0",
-    "typescript": "^3.5.3",
-    "@types/node": "^12.6.9"
+    "typescript": "^3.5.3"
   },
   "devDependencies": {
     "browserify": "^16.3.0",
