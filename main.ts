@@ -3,10 +3,13 @@ import {PerspectiveCamera, Scene, Vector3, WebGLRenderer} from "three";
 const scene = new Scene();
 const camera = new PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
 
-const renderer = new WebGLRenderer();
-renderer.setSize( window.innerWidth, window.innerHeight );
-renderer.setPixelRatio( window.devicePixelRatio );
-document.body.appendChild( renderer.domElement );
+document.onload = () =>
+{
+    const renderer = new WebGLRenderer();
+    renderer.setSize( window.innerWidth, window.innerHeight );
+    renderer.setPixelRatio( window.devicePixelRatio );
+    document.body.appendChild( renderer.domElement );
+};
 
 interface TreeSettings
 {
@@ -23,7 +26,7 @@ interface TreeSettings
 
 class Node
 {
-    constructor(parent: Node | null, position: Vector3, direction: Vector3)
+    constructor(parent: Node | undefined, position: Vector3, direction: Vector3)
     {
         this.parent = parent;
         this.position = position;
@@ -32,7 +35,7 @@ class Node
         this.influenceCount = 0;
     }
 
-    public parent: Node | null;
+    public parent: Node | undefined;
     public position: Vector3;
     public direction: Vector3;
     public influenceDirection: Vector3;
@@ -58,8 +61,12 @@ function getRandomArbitrary(min: number, max: number): number
 
 class Tree
 {
-    private position: Vector3;
-    private settings: TreeSettings;
+    private readonly position: Vector3;
+    private readonly settings: TreeSettings;
+
+    private readonly killDist: number;
+    private readonly influenceRadius: number;
+
     private attractionPoints: Array<AttractionPoint> = [];
     private nodes: Array<Node> = [];
 
@@ -67,6 +74,10 @@ class Tree
     {
         this.position = origin;
         this.settings = settings;
+
+        // Pre calculate kill and influence distance as it's based on node size
+        this.killDist = settings.killDistance * settings.nodeSize;
+        this.influenceRadius = settings.influenceRadius * settings.nodeSize;
 
         const crownSizeHalf = settings.crownSize.clone().divideScalar(2);
 
@@ -82,7 +93,7 @@ class Tree
         }
 
         // Create root node
-        const rootNode = new Node(null, this.position, new Vector3(0, 1, 0));
+        const rootNode = new Node(undefined, this.position.clone(), new Vector3(0, 1, 0));
         this.nodes.push(rootNode);
 
         let iterations = 0;
@@ -104,13 +115,11 @@ class Tree
             for (let node of this.nodes)
             {
                 const distance = attractionPoint.position.distanceTo(node.position);
-                const killDistance = this.settings.killDistance * this.settings.nodeSize;
-                const influenceRadius = this.settings.influenceRadius * this.settings.nodeSize;
 
-                if (distance > killDistance && distance < influenceRadius)
+                if (distance > this.killDist && distance < this.influenceRadius)
                 {
                     // Check if we're now the closest point and if so, set it
-                    if (attractionPoint.closestNode == null || distance < attractionPoint.closestNode.position.distanceTo(attractionPoint.position))
+                    if (attractionPoint.closestNode == undefined || distance < attractionPoint.closestNode.position.distanceTo(attractionPoint.position))
                     {
                         attractionPoint.closestNode = node;
                     }
@@ -144,32 +153,23 @@ class Tree
         }
 
         // Add new nodes
-        this.nodes.concat(newNodes);
+        this.nodes = this.nodes.concat(newNodes);
 
         // Remove attraction points
         // todo see if we can collapse this back into the first loop
         for (let node of this.nodes)
         {
+            const newAttractionPoints: Array<AttractionPoint> = [];
             for (let point of this.attractionPoints)
             {
                 const distance = point.position.distanceTo(node.position);
-                if (distance <= (this.settings.killDistance * this.settings.nodeSize)) {
-                    // Remove node as we've now reached it
-                    this.attractionPoints.splice(this.attractionPoints.indexOf(point), 1);
-                } else {
-                    //point++;
+                // If the distance is bigger then the kill distance then we keep the attraction point as we've not reached it yet
+                if (distance > this.killDist)
+                {
+                    newAttractionPoints.push(point);
                 }
             }
-/*            const point = attractionPoints.begin();
-            while (point != attractionPoints.end()) {
-                auto distance = glm::distance(point->position, node->position);
-                if (distance <= (settings.killDistance * settings.nodeSize)) {
-                    // Remove node as we've now reached it
-                    point = attractionPoints.erase(point);
-                } else {
-                    point++;
-                }
-            }*/
+            this.attractionPoints = newAttractionPoints;
         }
     }
 
