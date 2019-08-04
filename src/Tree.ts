@@ -64,6 +64,7 @@ export default class Tree
 
     public regenerate(scene: Scene)
     {
+        this.settings.crownShape.reseed();
         this.generateTree();
         this.generateGeometry(scene);
     }
