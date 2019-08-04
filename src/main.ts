@@ -2,6 +2,7 @@ import {GUI} from "dat.gui";
 import {Color, PerspectiveCamera, Plane, PlaneHelper, Scene, Vector3, WebGLRenderer} from "three";
 import {OrbitControls} from "three/examples/jsm/controls/OrbitControls";
 import Tree, {TreeSettings} from "./Tree";
+import {Sphere} from "./Shapes";
 
 function addVector(vector: Vector3, name: string, gui: GUI)
 {
@@ -36,8 +37,9 @@ const treeSettings: TreeSettings = {
     branchSides: 8,
     branchThickness: 0.2,
     colour: new Color(0x0000ff),
-    crownCentre: new Vector3(0, 2.5, 0),
-    crownSize: new Vector3(2, 5, 2),
+    crownShape: new Sphere(new Vector3(0, 2.5, 0), 3),
+    //crownCentre: new Vector3(0, 2.5, 0),
+    //crownSize: new Vector3(2, 5, 2),
     influenceRadius: 7,
     killDistance: 2,
     maxIterations: 200,
@@ -56,8 +58,8 @@ const gui = new GUI();
 gui.add(treeSettings, "attractionPoints", 1).onFinishChange(() => tree.regenerate(scene));
 gui.add(treeSettings, "branchSides", 3).onFinishChange(() => tree.generateGeometry(scene));
 gui.add(treeSettings, "branchThickness", 0).onFinishChange(() => tree.generateGeometry(scene));
-addVector(treeSettings.crownCentre, "Crown Centre", gui)/*.onFinishChange(() => tree.regenerate());*/
-addVector(treeSettings.crownSize, "Crown Size", gui)/*.onFinishChange(() => tree.regenerate());*/
+//addVector(treeSettings.crownCentre, "Crown Centre", gui)/*.onFinishChange(() => tree.regenerate());*/
+//addVector(treeSettings.crownSize, "Crown Size", gui)/*.onFinishChange(() => tree.regenerate());*/
 gui.add(treeSettings, "influenceRadius", 0).onFinishChange(() => tree.regenerate(scene));
 gui.add(treeSettings, "killDistance", 0).onFinishChange(() => tree.regenerate(scene));
 gui.add(treeSettings, "maxIterations", 1).onFinishChange(() => tree.regenerate(scene));

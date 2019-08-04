@@ -1,11 +1,11 @@
 import {Color, Geometry, LineBasicMaterial, LineSegments, Material, Scene, Vector3} from "three";
+import {Shape} from "./Shapes";
 
 export interface TreeSettings
 {
     attractionPoints: number;
     colour: Color;
-    crownCentre: Vector3;
-    crownSize: Vector3;
+    crownShape: Shape;
     influenceRadius: number;
     killDistance: number;
     nodeSize: number;
@@ -44,11 +44,6 @@ class Node
     }
 }
 
-function getRandomArbitrary(min: number, max: number): number
-{
-    return Math.random() * (max - min) + min;
-}
-
 export default class Tree
 {
     private readonly position: Vector3;
@@ -84,15 +79,9 @@ export default class Tree
         this.attractionPoints = [];
         this.nodes = [];
 
-        const crownSizeHalf = this.settings.crownSize.clone().divideScalar(2);
-
         for (let i = 0; i < this.settings.attractionPoints; ++i)
         {
-            const pos = this.settings.crownCentre.clone();
-            pos.x += getRandomArbitrary(-crownSizeHalf.x, crownSizeHalf.x);
-            pos.y += getRandomArbitrary(-crownSizeHalf.y, crownSizeHalf.y);
-            pos.z += getRandomArbitrary(-crownSizeHalf.z, crownSizeHalf.z);
-
+            const pos = this.settings.crownShape.getRandomPoint();
             const point: AttractionPoint = {position: pos};
             this.attractionPoints.push(point);
         }
