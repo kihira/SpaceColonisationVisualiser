@@ -1,4 +1,4 @@
-import {Vector3} from "three";
+import {Geometry, LineBasicMaterial, LineSegments, Scene, Vector3} from "three";
 
 export interface TreeSettings
 {
@@ -92,6 +92,24 @@ export default class Tree
         }
     }
 
+    public generateGeometry(scene: Scene)
+    {
+        const material = new LineBasicMaterial( { color: 0x0000ff } );
+        const geometry = new Geometry();
+
+        for (const node of this.nodes)
+        {
+            if (node.parent !== undefined)
+            {
+                geometry.vertices.push(node.position);
+                geometry.vertices.push(node.parent.position);
+            }
+        }
+
+        const line = new LineSegments( geometry, material );
+        scene.add(line);
+    }
+
     private grow()
     {
         if (this.attractionPoints.length === 0) { return; }
@@ -165,15 +183,5 @@ export default class Tree
             }
             this.attractionPoints = newAttractionPoints;
         }
-    }
-
-    private generateBranchVertices(node: Node): Vector3[]
-    {
-        return [];
-    }
-
-    private buildBuffers()
-    {
-        return;
     }
 }
