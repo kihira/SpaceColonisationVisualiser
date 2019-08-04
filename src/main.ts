@@ -19,11 +19,11 @@ document.body.appendChild( renderer.domElement );
 
 // Init camera
 const camera = new PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
-camera.position.set(0, 0, 10);
-camera.lookAt(0, 0, 0);
+camera.position.set(5, 5, 5);
 
 // Init controls
 const controls = new OrbitControls(camera, renderer.domElement);
+controls.target.set(0, 2, 0);
 controls.update();
 
 // Init scene
