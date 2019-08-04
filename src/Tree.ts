@@ -1,8 +1,9 @@
-import {Geometry, LineBasicMaterial, LineSegments, Scene, Vector3} from "three";
+import {Color, Geometry, LineBasicMaterial, LineSegments, Material, Scene, Vector3} from "three";
 
 export interface TreeSettings
 {
     attractionPoints: number;
+    colour: Color;
     crownCentre: Vector3;
     crownSize: Vector3;
     influenceRadius: number;
@@ -53,26 +54,41 @@ export default class Tree
     private readonly position: Vector3;
     private readonly settings: TreeSettings;
 
-    private readonly killDist: number;
-    private readonly influenceRadius: number;
-
+    private killDist: number = 0;
+    private influenceRadius: number = 0;
     private attractionPoints: AttractionPoint[] = [];
     private nodes: Node[] = [];
+
+    private renderObject: LineSegments | null = null;
 
     public constructor(settings: TreeSettings, origin: Vector3)
     {
         this.position = origin;
         this.settings = settings;
+    }
 
+    public regenerate(scene: Scene)
+    {
+        this.generateTree();
+        this.generateGeometry(scene);
+    }
+
+    /**
+     * Generates the tree's structure
+     */
+    public generateTree()
+    {
         // Pre calculate kill and influence distance as it's based on node size
-        this.killDist = settings.killDistance * settings.nodeSize;
-        this.influenceRadius = settings.influenceRadius * settings.nodeSize;
+        this.killDist = this.settings.killDistance * this.settings.nodeSize;
+        this.influenceRadius = this.settings.influenceRadius * this.settings.nodeSize;
+        this.attractionPoints = [];
+        this.nodes = [];
 
-        const crownSizeHalf = settings.crownSize.clone().divideScalar(2);
+        const crownSizeHalf = this.settings.crownSize.clone().divideScalar(2);
 
-        for (let i = 0; i < settings.attractionPoints; ++i)
+        for (let i = 0; i < this.settings.attractionPoints; ++i)
         {
-            const pos = settings.crownCentre.clone();
+            const pos = this.settings.crownCentre.clone();
             pos.x += getRandomArbitrary(-crownSizeHalf.x, crownSizeHalf.x);
             pos.y += getRandomArbitrary(-crownSizeHalf.y, crownSizeHalf.y);
             pos.z += getRandomArbitrary(-crownSizeHalf.z, crownSizeHalf.z);
@@ -86,15 +102,20 @@ export default class Tree
         this.nodes.push(rootNode);
 
         let iterations = 0;
-        while (this.attractionPoints.length > 0 && iterations < settings.maxIterations) {
+        do {
             this.grow();
             iterations++;
         }
+        while (this.attractionPoints.length > 0 && iterations < this.settings.maxIterations);
     }
 
+    /**
+     * Generates and uploads the geometry and material for the tree
+     * @param scene The scene that the tree is part of
+     */
     public generateGeometry(scene: Scene)
     {
-        const material = new LineBasicMaterial( { color: 0x0000ff } );
+        const material = new LineBasicMaterial( { color: this.settings.colour } );
         const geometry = new Geometry();
 
         for (const node of this.nodes)
@@ -106,8 +127,16 @@ export default class Tree
             }
         }
 
-        const line = new LineSegments( geometry, material );
-        scene.add(line);
+        // If there is an existing object, clean it up
+        if (this.renderObject != null)
+        {
+            this.renderObject.geometry.dispose();
+            (this.renderObject.material as Material).dispose();
+            scene.remove(this.renderObject);
+        }
+
+        this.renderObject = new LineSegments( geometry, material );
+        scene.add(this.renderObject);
     }
 
     private grow()
