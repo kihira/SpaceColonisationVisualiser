@@ -1,26 +1,32 @@
-import {Vector3} from "./node_modules/three/src/three.js";
+import {Vector3} from "three";
 
 export interface TreeSettings
 {
-    crownCentre: Vector3,
-    crownSize: Vector3,
-    attractionPoints: number,
-    influenceRadius: number,
-    killDistance: number,
-    nodeSize: number,
-    maxIterations: number,
-    branchSides: number,
-    branchThickness: number
+    attractionPoints: number;
+    crownCentre: Vector3;
+    crownSize: Vector3;
+    influenceRadius: number;
+    killDistance: number;
+    nodeSize: number;
+    maxIterations: number;
+    branchSides: number;
+    branchThickness: number;
 }
 
 interface AttractionPoint
 {
-    position: Vector3,
-    closestNode?: Node
+    position: Vector3;
+    closestNode?: Node;
 }
 
 class Node
 {
+    public parent: Node | undefined;
+    public position: Vector3;
+    public direction: Vector3;
+    public influenceDirection: Vector3;
+    public influenceCount: number;
+
     constructor(parent: Node | undefined, position: Vector3, direction: Vector3)
     {
         this.parent = parent;
@@ -29,12 +35,6 @@ class Node
         this.influenceDirection = direction;
         this.influenceCount = 0;
     }
-
-    public parent: Node | undefined;
-    public position: Vector3;
-    public direction: Vector3;
-    public influenceDirection: Vector3;
-    public influenceCount: number;
 
     public resetInfluence()
     {
@@ -56,8 +56,8 @@ export default class Tree
     private readonly killDist: number;
     private readonly influenceRadius: number;
 
-    private attractionPoints: Array<AttractionPoint> = [];
-    private nodes: Array<Node> = [];
+    private attractionPoints: AttractionPoint[] = [];
+    private nodes: Node[] = [];
 
     public constructor(settings: TreeSettings, origin: Vector3)
     {
@@ -94,21 +94,22 @@ export default class Tree
 
     private grow()
     {
-        if (this.attractionPoints.length == 0) return;
+        if (this.attractionPoints.length === 0) { return; }
 
         // Loop over attraction points and see if any nodes are attracted
-        for (let attractionPoint of this.attractionPoints)
+        for (const attractionPoint of this.attractionPoints)
         {
             attractionPoint.closestNode = undefined;
 
-            for (let node of this.nodes)
+            for (const node of this.nodes)
             {
                 const distance = attractionPoint.position.distanceTo(node.position);
 
                 if (distance > this.killDist && distance < this.influenceRadius)
                 {
                     // Check if we're now the closest point and if so, set it
-                    if (attractionPoint.closestNode == undefined || distance < attractionPoint.closestNode.position.distanceTo(attractionPoint.position))
+                    if (attractionPoint.closestNode === undefined
+                        || distance < attractionPoint.closestNode.position.distanceTo(attractionPoint.position))
                     {
                         attractionPoint.closestNode = node;
                     }
@@ -116,7 +117,7 @@ export default class Tree
             }
 
             // Move node towards point
-            if (attractionPoint.closestNode != undefined)
+            if (attractionPoint.closestNode !== undefined)
             {
                 let direction = attractionPoint.position.clone().sub(attractionPoint.closestNode.position);
                 direction = direction.normalize();
@@ -126,14 +127,18 @@ export default class Tree
         }
 
         // Generate new nodes
-        const newNodes: Array<Node> = [];
-        for (let node of this.nodes)
+        const newNodes: Node[] = [];
+        for (const node of this.nodes)
         {
             if (node.influenceCount > 0)
             {
                 // Calculate new position and direction of branch based on point influence
                 const direction = node.influenceDirection.clone().divideScalar(node.influenceCount).normalize();
-                const newNode = new Node(node, node.position.clone().add(direction.multiplyScalar(this.settings.nodeSize)), direction);
+                const newNode = new Node(
+                    node,
+                    node.position.clone().add(direction.multiplyScalar(this.settings.nodeSize)),
+                    direction,
+                );
                 newNodes.push(newNode);
 
                 // Reset node direction/influence
@@ -146,13 +151,13 @@ export default class Tree
 
         // Remove attraction points
         // todo see if we can collapse this back into the first loop
-        for (let node of this.nodes)
+        for (const node of this.nodes)
         {
-            const newAttractionPoints: Array<AttractionPoint> = [];
-            for (let point of this.attractionPoints)
+            const newAttractionPoints: AttractionPoint[] = [];
+            for (const point of this.attractionPoints)
             {
                 const distance = point.position.distanceTo(node.position);
-                // If the distance is bigger then the kill distance then we keep the attraction point as we've not reached it yet
+                // If the distance is bigger then the kill distance, keep the attraction point as its not reached it yet
                 if (distance > this.killDist)
                 {
                     newAttractionPoints.push(point);
@@ -162,13 +167,13 @@ export default class Tree
         }
     }
 
-    private generateBranchVertices(node: Node): Array<Vector3>
+    private generateBranchVertices(node: Node): Vector3[]
     {
         return [];
     }
 
     private buildBuffers()
     {
-
+        return;
     }
 }

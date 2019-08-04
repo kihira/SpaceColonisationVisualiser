@@ -1,6 +1,6 @@
-import {Geometry, Line, LineBasicMaterial, PerspectiveCamera, Scene, Vector3, WebGLRenderer} from "./node_modules/three/src/three.js";
-import Tree from "./Tree.js";
-import {OrbitControls} from "./node_modules/three/examples/jsm/controls/OrbitControls.js";
+import {Geometry, Line, LineBasicMaterial, PerspectiveCamera, Scene, Vector3, WebGLRenderer} from "three";
+import {OrbitControls} from "three/examples/jsm/controls/OrbitControls";
+import Tree from "./Tree";
 
 const scene = new Scene();
 const camera = new PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
@@ -27,14 +27,13 @@ renderer.render(scene, camera);
 
 // Create a tree
 const tree = new Tree({
+    attractionPoints: 500,
+    branchSides: 8,
+    branchThickness: 0.2,
     crownCentre: new Vector3(0, 2.5, 0),
     crownSize: new Vector3(2, 5, 2),
-    attractionPoints: 500,
     influenceRadius: 15,
     killDistance: 2,
-    nodeSize: 0.15,
     maxIterations: 200,
-    branchSides: 8,
-    branchThickness: 0.2
+    nodeSize: 0.15,
 }, new Vector3(0, 0, 0));
-

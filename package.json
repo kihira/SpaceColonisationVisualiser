@@ -2,20 +2,21 @@
   "name": "spacecolonization",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "private": true,
   "scripts": {
-    "watch": "watchify --debug main.js -o bundle.js"
+    "watch": "webpack --watch --mode=development",
+    "build": "webpack"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
     "@types/node": "^12.6.9",
     "three": "^0.107.0",
-    "typescript": "^3.5.3"
+    "ts-loader": "^6.0.4",
+    "typescript": "^3.5.3",
+    "webpack": "^4.39.1"
   },
   "devDependencies": {
-    "browserify": "^16.3.0",
-    "watchify": "^3.11.1"
+    "webpack-cli": "^3.3.6",
+    "tslint": "^5.18.0"
   }
 }
