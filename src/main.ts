@@ -33,7 +33,7 @@ const treeSettings: TreeSettings = {
     influenceRadius: 7,
     killDistance: 2,
     maxIterations: 200,
-    nodeSize: 0.15,
+    nodeSize: 0.2,
 };
 const tree = new Tree(treeSettings, new Vector3(0, 0, 0));
 tree.generateTree();
@@ -47,12 +47,13 @@ scene.add(new PlaneHelper(plane, 4, 0xAAAAAA));
 const gui = new GUI();
 gui.add(treeSettings.crownShape, "seed").onFinishChange(() => tree.regenerate(scene));
 gui.add(treeSettings, "attractionPoints", 1).onFinishChange(() => tree.regenerate(scene));
-gui.add(treeSettings, "branchSides", 3).onFinishChange(() => tree.generateGeometry(scene));
-gui.add(treeSettings, "branchThickness", 0).onFinishChange(() => tree.generateGeometry(scene));
 gui.add(treeSettings, "influenceRadius", 0).onFinishChange(() => tree.regenerate(scene));
 gui.add(treeSettings, "killDistance", 0).onFinishChange(() => tree.regenerate(scene));
 gui.add(treeSettings, "maxIterations", 1).onFinishChange(() => tree.regenerate(scene));
 gui.add(treeSettings, "nodeSize", 0).onFinishChange(() => tree.regenerate(scene));
+const renderSettingsGui = gui.addFolder("Render Settings");
+renderSettingsGui.add(treeSettings, "branchSides", 3).onFinishChange(() => tree.generateGeometry(scene));
+renderSettingsGui.add(treeSettings, "branchThickness", 0).onFinishChange(() => tree.generateGeometry(scene));
 
 // Start the animation/render loop
 animate();
